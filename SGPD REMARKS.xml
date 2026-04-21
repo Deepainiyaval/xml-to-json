@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<View xmlns:ns1="http: xml.netbeans.org/schema/poirViewSchema" xmlns:xsi="http: www.w3.org/2001/XMLSchema-instance" colSpan="1" id="view2" title="this is title">
+          <TransparentContainer colCount="1" colSpan="1" id="mainTC" layout="GridLayout" cellPadding="1" cellSpacing="1" width="" height="">
+                    <GroupBox id="GroupBoxHeader" colSpan="1" colCount="2" header="" cellSpacing="2" cellPadding="5" width="100%" design="secondarycolor" hasContentPadding="true" height="">
+                              <TextView colSpan="1" design="header2" hAlign="left" id="Text00012" layout="paragraph" semanticColor="standard" text="SGPD MORNING REPORT"/>
+                              <InputField colSpan="1" complex="M" convFact="1" dateFormat="MM/dd/yyyy" decPlaces="" displayIfNull="" frequency="D" hAlign="right" id="header1" length="10" offset="0" operFacl="SGPD" readOnly="false" storeDefault="true" tagName="REPDATE"/>
+                    </GroupBox>
+                    <GroupBox id="GroupBoxHeader03427" colSpan="1" colCount="1" header="Operation Remarks" cellSpacing="2" cellPadding="5" width="100%" design="secondarycolor" hasContentPadding="true" height="">
+                              <TextEdit id="TextEdit0" colSpan="1" tagName="SGPD_SAOO_OPRT_REM" readOnly="false" frequency="D" offset="0" operFacl="SGPD" cols="200" rows="7" rowUnit="1" displayIfNull="" dateFormat="MM/dd/yyyy" decPlaces="" storeDefault="true" convFact="1" complex="M"/>
+                    </GroupBox>
+          </TransparentContainer>
+</View>

@@ -63,6 +63,15 @@ def to_int(value, default=0):
 def to_bool(value):
     return str(value).lower() == "true"
 
+#  STYLE HELPER
+def apply_style(component, attributes, mapping):
+    style = component["input"]["style"]
+
+    for xml_key, json_key in mapping.items():
+        value = attributes.get(xml_key)
+        if value is not None:
+            style[json_key] = value
+
 # -------------------------------
 # COMPONENT BUILDERS
 # -------------------------------
@@ -87,17 +96,17 @@ def create_component(tag, element, index, parent_id):
         "rlist": ("List", "list", "app-list"),
         "rchart": ("Chart", "chart", "app-chart"),
 
-        # Containers 
-        "transparentcontainer": None,
-        "groupbox": None,
-        "uiterator": None,
-        "iteratortc": None,
-        "rtransparentcontainer": None,
-        "rgroupbox": None,
-        "rinvisibleelement": None
+        # Containers
+        "transparentcontainer": ("Container", "container", "app-container"),
+        "groupbox": ("GroupBox", "group", "app-group"),
+        "uiterator": ("Iterator", "iterator", "app-iterator"),
+        "iteratortc": ("IteratorContainer", "iterator-container", "app-iterator-container"),
+        "rtransparentcontainer": ("Container", "container", "app-container"),
+        "rgroupbox": ("GroupBox", "group", "app-group"),
+        "rinvisibleelement": ("Invisible", "invisible", "app-invisible")
     }
 
-    if tag not in mapping or mapping[tag] is None:
+    if tag not in mapping :
         return None
 
     label, comp_type, selector = mapping[tag]
@@ -118,14 +127,17 @@ def create_component(tag, element, index, parent_id):
 
     # TEXTVIEW / RLABEL
     if tag in ["textview", "rlabel"]:
-        component.update({
-            "text": attributes.get("text"),
-            "colSpan": to_int(attributes.get("colSpan"), 1),
-            "design": attributes.get("design"),
-            "hAlign": attributes.get("hAlign") or attributes.get("textalign"),
-            "color": attributes.get("semanticColor") or attributes.get("color"),
-            "fontSize": attributes.get("fontsize"),
-            "fontWeight": attributes.get("fontweight")
+        component["text"] = attributes.get("text")
+
+        apply_style(component, attributes, {
+            "colSpan": "colSpan",
+            "design": "design",
+            "hAlign": "hAlign",
+            "textalign": "hAlign",
+            "semanticColor": "color",
+            "color": "color",
+            "fontsize": "fontSize",
+            "fontweight": "fontWeight"
         })
 
     # INPUTFIELD / RINPUTFIELD
@@ -135,13 +147,20 @@ def create_component(tag, element, index, parent_id):
             "frequency": attributes.get("frequency"),
             "decPlaces": to_int(attributes.get("decPlaces"), 0),
             "readOnly": to_bool(attributes.get("readOnly")),
-            "colSpan": to_int(attributes.get("colSpan"), 1),
             "displayIfNull": attributes.get("displayIfNull"),
             "valueSpan": to_int(attributes.get("valueSpan"), 1),
             "spanType": attributes.get("spanType"),
             "offset": attributes.get("offset"),
-            "operFacl": attributes.get("operFacl"),
-            "textAlign": attributes.get("textalign")
+            "operFacl": attributes.get("operFacl")
+        })
+
+        apply_style(component, attributes, {
+            "colSpan": "colSpan",
+            "textalign": "textAlign",
+            "fontsize": "fontSize",
+            "fontweight": "fontWeight",
+            "color": "color",
+            "bgcolor": "backgroundColor"
         })
 
     # DROPDOWN
@@ -150,8 +169,11 @@ def create_component(tag, element, index, parent_id):
             "tagName": attributes.get("tagName"),
             "valuesList": attributes.get("valuesList"),
             "frequency": attributes.get("frequency"),
-            "colSpan": to_int(attributes.get("colSpan"), 1),
             "readOnly": to_bool(attributes.get("readOnly"))
+        })
+
+        apply_style(component, attributes, {
+            "colSpan": "colSpan"
         })
 
     # TEXTEDIT
@@ -160,8 +182,11 @@ def create_component(tag, element, index, parent_id):
             "rows": to_int(attributes.get("rows")),
             "cols": to_int(attributes.get("cols")),
             "tagName": attributes.get("tagName"),
-            "frequency": attributes.get("frequency"),
-            "colSpan": to_int(attributes.get("colSpan"), 1)
+            "frequency": attributes.get("frequency")
+        })
+
+        apply_style(component, attributes, {
+            "colSpan": "colSpan"
         })
 
     # RANGE
@@ -178,16 +203,22 @@ def create_component(tag, element, index, parent_id):
     elif tag == "rlink":
         component.update({
             "url": attributes.get("url"),
-            "text": attributes.get("text"),
-            "color": attributes.get("color"),
-            "fontSize": attributes.get("font-size"),
-            "textAlign": attributes.get("text-align")
+            "text": attributes.get("text")
+        })
+
+        apply_style(component, attributes, {
+            "color": "color",
+            "font-size": "fontSize",
+            "text-align": "textAlign"
         })
 
     # LINE
     elif tag == "rline":
+        apply_style(component, attributes, {
+            "color": "color"
+        })
+
         component.update({
-            "color": attributes.get("color"),
             "pattern": attributes.get("leader-pattern"),
             "length": attributes.get("leader-length"),
             "thickness": attributes.get("rule-thickness")
@@ -204,8 +235,30 @@ def create_component(tag, element, index, parent_id):
                 "label": label.text if label is not None else "",
                 "body": body.text if body is not None else ""
             })
+            component["items"] = items
+    if tag in [
+        "transparentcontainer",
+        "groupbox",
+        "uiterator",
+        "iteratortc",
+        "rtransparentcontainer",
+        "rgroupbox"
+    ]:
+        apply_style(component, attributes, {
+            "colSpan": "colSpan",
+            "colCount": "colCount",
+            "width": "width",
+            "height": "height",
+            "layout": "layout",
+            "cellPadding": "cellPadding",
+            "cellSpacing": "cellSpacing",
+            "design": "design",
+            "header": "header",
+            "hasContentPadding": "hasContentPadding"
+        })
+            
 
-        component["items"] = items
+        component["rawAttributes"] = attributes   
 
     return component
 
@@ -223,11 +276,16 @@ def extract_components(xml_node, parent_id):
         comp = create_component(tag, elem, index, parent_id)
 
         if comp:
+            comp_id = comp["id"]
+
+            # Recursively get children
+            children = extract_components(elem, comp_id)
+
+            if children:
+                comp["children"] = children
+
             components.append(comp)
             index += 1
-
-        # recursion
-        components.extend(extract_components(elem, parent_id))
 
     return components
 
